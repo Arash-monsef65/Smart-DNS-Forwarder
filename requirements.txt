@@ -1,0 +1,10 @@
+# Core DNS dependencies
+dnslib
+redis>=5.0.0
+aiodns
+
+# Web Console dependencies
+Flask
+Flask-HTTPAuth
+gunicorn
+werkzeug

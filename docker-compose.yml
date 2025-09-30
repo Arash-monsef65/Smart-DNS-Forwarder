@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # 1. Redis Service
+  redis:
+    image: "redis:alpine"
+    container_name: dns-redis
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  # 2. DNS Server Service
+  dns-server:
+    build: .
+    container_name: dns-server-app
+    restart: always
+    command: python3 launcher.py
+    ports:
+      - "53:53/udp"
+    volumes:
+      - ./config.json:/opt/dns/config.json
+    depends_on:
+      - redis
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+
+  # 3. Management Console Service
+  console:
+    build: .
+    container_name: dns-console-app
+    restart: always
+    command: gunicorn --workers 4 --bind 0.0.0.0:5000 management_console:app
+    ports:
+      - "5000:5000/tcp"
+    volumes:
+      - ./config.json:/opt/dns/config.json
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
